@@ -22,12 +22,6 @@ interface FooterProps {
   className?: string
 }
 
-const NEW_API_FOOTER_ATTRIBUTION_KEY = [
-  'footer',
-  'new' + 'api',
-  'projectAttributionSuffix',
-].join('.')
-
 function FooterLinkItem(props: { link: FooterLink }) {
   const { t } = useTranslation()
   const isExternal = props.link.href.startsWith('http')
@@ -56,22 +50,28 @@ function FooterLinkItem(props: { link: FooterLink }) {
   )
 }
 
-function ProjectAttribution(props: { currentYear: number }) {
-  const { t } = useTranslation()
-
+function ProjectAttribution() {
   return (
     <div className='text-muted-foreground/45 text-center text-xs sm:text-right'>
       <span className='text-muted-foreground/45'>
-        &copy; {props.currentYear}{' '}
+        Powered by{' '}
         <a
           href='https://github.com/QuantumNous/new-api'
           target='_blank'
           rel='noopener noreferrer'
           className='text-foreground/70 font-medium transition-colors hover:text-foreground'
         >
-          {t('New API')}
+          New API
         </a>
-        . {t(NEW_API_FOOTER_ATTRIBUTION_KEY)}
+        {' '}(AGPL-3.0). Source:{' '}
+        <a
+          href='https://github.com/xuanbingbingo/luck-api'
+          target='_blank'
+          rel='noopener noreferrer'
+          className='text-foreground/70 font-medium transition-colors hover:text-foreground'
+        >
+          luck-api
+        </a>
       </span>
     </div>
   )
@@ -87,66 +87,11 @@ export function Footer(props: FooterProps) {
   } = useSystemConfig()
 
   const displayLogo = systemLogo || props.logo || '/logo.png'
-  const displayName = systemName || props.name || 'New API'
+  const displayName = systemName || props.name || 'Luck API'
   const isDemoSiteMode = Boolean(demoSiteEnabled)
   const currentYear = new Date().getFullYear()
 
-  const fallbackColumns = useMemo<FooterColumnProps[]>(
-    () => [
-      {
-        title: t('footer.columns.about.title'),
-        links: [
-          {
-            text: t('footer.columns.about.links.aboutProject'),
-            href: 'https://docs.newapi.pro/wiki/project-introduction/',
-          },
-          {
-            text: t('footer.columns.about.links.contact'),
-            href: 'https://docs.newapi.pro/support/community-interaction/',
-          },
-          {
-            text: t('footer.columns.about.links.features'),
-            href: 'https://docs.newapi.pro/wiki/features-introduction/',
-          },
-        ],
-      },
-      {
-        title: t('footer.columns.docs.title'),
-        links: [
-          {
-            text: t('footer.columns.docs.links.quickStart'),
-            href: 'https://docs.newapi.pro/getting-started/',
-          },
-          {
-            text: t('footer.columns.docs.links.installation'),
-            href: 'https://docs.newapi.pro/installation/',
-          },
-          {
-            text: t('footer.columns.docs.links.apiDocs'),
-            href: 'https://docs.newapi.pro/api/',
-          },
-        ],
-      },
-      {
-        title: t('footer.columns.related.title'),
-        links: [
-          {
-            text: t('footer.columns.related.links.oneApi'),
-            href: 'https://github.com/songquanpeng/one-api',
-          },
-          {
-            text: t('footer.columns.related.links.midjourney'),
-            href: 'https://github.com/novicezk/midjourney-proxy',
-          },
-          {
-            text: t('footer.columns.related.links.neko'),
-            href: 'https://github.com/Calcium-Ion/neko-api-key-tool',
-          },
-        ],
-      },
-    ],
-    [t]
-  )
+  const fallbackColumns = useMemo<FooterColumnProps[]>(() => [], [])
 
   const displayColumns = props.columns ?? fallbackColumns
 
@@ -160,7 +105,7 @@ export function Footer(props: FooterProps) {
               dangerouslySetInnerHTML={{ __html: footerHtml }}
             />
             <div className='border-border/60 w-full border-t pt-4 sm:w-auto sm:border-t-0 sm:border-l sm:pt-0 sm:pl-5'>
-              <ProjectAttribution currentYear={currentYear} />
+              <ProjectAttribution />
             </div>
           </div>
         </div>
