@@ -14,7 +14,7 @@ import (
 var StartTime = time.Now().Unix() // unit: second
 var Version = "v0.0.0"            // this hard coding will be replaced automatically when building, no need to manually change
 var SystemName = "Luck API"
-var Footer = `<p style="text-align:center;margin-top:8px;">© 2026 玉枢云创科技 · <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">浙ICP备2026024045号-1</a></p>`
+var Footer = `<span style="font-size:0.75rem;">© 2026 玉枢云创科技 · <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">浙ICP备2026024045号-1</a></span>`
 var Logo = ""
 var TopUpLink = ""
 
