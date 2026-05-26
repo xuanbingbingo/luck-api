@@ -38,6 +38,10 @@ import {
   WaffoSettingsSection,
   type WaffoSettingsValues,
 } from './waffo-settings-section'
+import {
+  WxpaySettingsSection,
+  type WxpaySettingsValues,
+} from './wxpay-settings-section'
 
 const paymentSchema = z.object({
   PayAddress: z.string().refine((value) => {
@@ -111,12 +115,14 @@ type PaymentSettingsSectionProps = {
   defaultValues: PaymentFormValues
   waffoDefaultValues: WaffoSettingsValues
   waffoPancakeDefaultValues: WaffoPancakeSettingsValues
+  wxpayDefaultValues: WxpaySettingsValues
 }
 
 export function PaymentSettingsSection({
   defaultValues,
   waffoDefaultValues,
   waffoPancakeDefaultValues,
+  wxpayDefaultValues,
 }: PaymentSettingsSectionProps) {
   const { t } = useTranslation()
   const updateOption = useUpdateOption()
@@ -1291,6 +1297,10 @@ export function PaymentSettingsSection({
       <Separator />
 
       <WaffoPancakeSettingsSection defaultValues={waffoPancakeDefaultValues} />
+
+      <Separator />
+
+      <WxpaySettingsSection defaultValues={wxpayDefaultValues} />
       {/* eslint-enable react-hooks/refs */}
     </SettingsSection>
   )

@@ -199,6 +199,15 @@ export type IntegrationSettings = {
   WaffoPancakeCurrency: string
   WaffoPancakeUnitPrice: number
   WaffoPancakeMinTopUp: number
+  WxMchId: string
+  WxAppId: string
+  WxApiV3Key: string
+  WxCertSerialNo: string
+  WxPrivateKeyPem: string
+  WxCertPem: string
+  WxPublicKeyID: string
+  WxPublicKeyPem: string
+  WxMinTopUp: number
 }
 
 export type ModelSettings = {

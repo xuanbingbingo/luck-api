@@ -74,6 +74,15 @@ const defaultIntegrationSettings: IntegrationSettingsType = {
   WaffoPancakeCurrency: 'USD',
   WaffoPancakeUnitPrice: 1,
   WaffoPancakeMinTopUp: 1,
+  WxMchId: '',
+  WxAppId: '',
+  WxApiV3Key: '',
+  WxCertSerialNo: '',
+  WxPrivateKeyPem: '',
+  WxCertPem: '',
+  WxPublicKeyID: '',
+  WxPublicKeyPem: '',
+  WxMinTopUp: 1,
 }
 
 export function IntegrationSettings() {

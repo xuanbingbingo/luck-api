@@ -66,6 +66,17 @@ const INTEGRATIONS_SECTIONS = [
           WaffoPancakeUnitPrice: settings.WaffoPancakeUnitPrice ?? 1,
           WaffoPancakeMinTopUp: settings.WaffoPancakeMinTopUp ?? 1,
         }}
+        wxpayDefaultValues={{
+          WxMchId: settings.WxMchId ?? '',
+          WxAppId: settings.WxAppId ?? '',
+          WxApiV3Key: settings.WxApiV3Key ?? '',
+          WxCertSerialNo: settings.WxCertSerialNo ?? '',
+          WxPrivateKeyPem: settings.WxPrivateKeyPem ?? '',
+          WxCertPem: settings.WxCertPem ?? '',
+          WxPublicKeyID: settings.WxPublicKeyID ?? '',
+          WxPublicKeyPem: settings.WxPublicKeyPem ?? '',
+          WxMinTopUp: settings.WxMinTopUp ?? 1,
+        }}
       />
     ),
   },
