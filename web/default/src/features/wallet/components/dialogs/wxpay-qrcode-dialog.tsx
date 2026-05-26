@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { formatCurrency } from '../../lib'
+import { formatCnyAmount } from '../../lib'
 import type { WxPayPaymentData } from '../../types'
 
 interface WxPayQRCodeDialogProps {
@@ -81,7 +81,7 @@ export function WxPayQRCodeDialog({
                 abbreviate: false,
               })}
               {' ≈ '}
-              {formatCurrency(moneyCny)} CNY
+              {formatCnyAmount(moneyCny)}
             </div>
           </div>
 

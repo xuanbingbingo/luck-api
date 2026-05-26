@@ -44,6 +44,17 @@ export function formatCurrency(amount: number | string): string {
 }
 
 /**
+ * Format payment amount that is fixed in CNY (e.g. WeChat Pay V3 enforces CNY).
+ * Always shows ¥ prefix, independent of system `quotaDisplayType`.
+ */
+export function formatCnyAmount(amount: number | string): string {
+  const numeric =
+    typeof amount === 'number' ? amount : Number.parseFloat(String(amount))
+  if (!Number.isFinite(numeric)) return '-'
+  return `¥${numeric.toFixed(2)}`
+}
+
+/**
  * Get discount label for display (e.g., "20% OFF")
  */
 export function getDiscountLabel(discount: number): string {

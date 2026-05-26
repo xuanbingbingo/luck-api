@@ -21,7 +21,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import {
-  formatCurrency,
+  formatCnyAmount,
   getDiscountLabel,
   getPaymentIcon,
   getMinTopupAmount,
@@ -251,11 +251,11 @@ export function RechargeFormCard({
                               )}
                             </div>
                             <div className='text-muted-foreground mt-1.5 w-full text-xs sm:mt-2'>
-                              Pay {formatCurrency(actualPrice)}
+                              Pay {formatCnyAmount(actualPrice)}
                               {hasDiscount && savedAmount > 0 && (
                                 <span className='text-green-600'>
                                   {' '}
-                                  • Save {formatCurrency(savedAmount)}
+                                  • Save {formatCnyAmount(savedAmount)}
                                 </span>
                               )}
                             </div>
@@ -291,7 +291,7 @@ export function RechargeFormCard({
                         <Skeleton className='h-5 w-16' />
                       ) : (
                         <span className='text-sm font-semibold'>
-                          {formatCurrency(paymentAmount)}
+                          {formatCnyAmount(paymentAmount)}
                         </span>
                       )}
                     </div>
