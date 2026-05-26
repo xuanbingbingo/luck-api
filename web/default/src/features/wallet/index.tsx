@@ -9,6 +9,7 @@ import { BillingHistoryDialog } from './components/dialogs/billing-history-dialo
 import { CreemConfirmDialog } from './components/dialogs/creem-confirm-dialog'
 import { PaymentConfirmDialog } from './components/dialogs/payment-confirm-dialog'
 import { TransferDialog } from './components/dialogs/transfer-dialog'
+import { WxPayQRCodeDialog } from './components/dialogs/wxpay-qrcode-dialog'
 import { RechargeFormCard } from './components/recharge-form-card'
 import { SubscriptionPlansCard } from './components/subscription-plans-card'
 import { WalletStatsCard } from './components/wallet-stats-card'
@@ -21,6 +22,7 @@ import {
   useCreemPayment,
   useWaffoPayment,
   useWaffoPancakePayment,
+  useWxPayPayment,
 } from './hooks'
 import {
   getDefaultPaymentType,
@@ -84,6 +86,13 @@ export function Wallet(props: WalletProps) {
   const { processWaffoPayment } = useWaffoPayment()
   const { processing: pancakeProcessing, processWaffoPancakePayment } =
     useWaffoPancakePayment()
+  const {
+    creating: wxpayCreating,
+    paymentData: wxpayData,
+    pollStatus: wxpayPollStatus,
+    startWxPayment,
+    cancel: cancelWxPayment,
+  } = useWxPayPayment()
 
   // Fetch and refresh user data
   const fetchUser = useCallback(async () => {
@@ -216,6 +225,31 @@ export function Wallet(props: WalletProps) {
     }
   }
 
+  // WeChat Pay V3 Native: 用户点击「微信支付」→ 开始下单流程
+  const handleWxPayClick = useCallback(async () => {
+    const minTopup =
+      topupInfo?.wxpay_min_topup ?? getMinTopupAmount(topupInfo)
+    if (topupAmount < minTopup) {
+      return
+    }
+    await startWxPayment(Math.floor(topupAmount))
+  }, [topupAmount, topupInfo, startWxPayment])
+
+  const handleWxPayDialogChange = useCallback(
+    (open: boolean) => {
+      if (!open) {
+        cancelWxPayment()
+      }
+    },
+    [cancelWxPayment]
+  )
+
+  // 支付成功 → 关弹窗 + 刷余额
+  const handleWxPayPaid = useCallback(() => {
+    cancelWxPayment()
+    void fetchUser()
+  }, [cancelWxPayment, fetchUser])
+
   const handleWaffoMethodSelect = async (_method: unknown, index: number) => {
     const loadingKey = `waffo-${index}`
     setPaymentLoading(loadingKey)
@@ -288,6 +322,10 @@ export function Wallet(props: WalletProps) {
                   enableWaffoPancakeTopup={
                     topupInfo?.enable_waffo_pancake_topup
                   }
+                  enableWxPayTopup={topupInfo?.enable_wxpay_topup}
+                  wxpayMinTopup={topupInfo?.wxpay_min_topup}
+                  onWxPayClick={handleWxPayClick}
+                  wxpayLoading={wxpayCreating}
                 />
               </div>
 
@@ -339,6 +377,16 @@ export function Wallet(props: WalletProps) {
         onConfirm={handleCreemConfirm}
         product={selectedCreemProduct}
         processing={creemProcessing}
+      />
+
+      <WxPayQRCodeDialog
+        open={wxpayData !== null}
+        onOpenChange={handleWxPayDialogChange}
+        paymentData={wxpayData}
+        pollStatus={wxpayPollStatus}
+        onPaid={handleWxPayPaid}
+        onRetry={handleWxPayClick}
+        usdExchangeRate={effectiveUsdExchangeRate}
       />
     </>
   )

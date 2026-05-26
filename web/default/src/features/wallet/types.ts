@@ -127,7 +127,50 @@ export interface TopupInfo {
   enable_waffo_pancake_topup?: boolean
   /** Minimum topup amount for Waffo Pancake */
   waffo_pancake_min_topup?: number
+  /** Whether WeChat Pay V3 Native topup is enabled */
+  enable_wxpay_topup?: boolean
+  /** Minimum topup amount for WeChat Pay */
+  wxpay_min_topup?: number
 }
+
+/**
+ * WeChat Pay Native payment request parameters
+ */
+export interface WxPayPaymentRequest {
+  /** Topup amount (USD or tokens, same unit as other payment methods) */
+  amount: number
+}
+
+/**
+ * WeChat Pay Native payment response data
+ */
+export interface WxPayPaymentData {
+  /** Local trade number, used for status polling */
+  trade_no: string
+  /** WeChat-issued code URL, encode this string into a QR code */
+  code_url: string
+  /** Actual payment amount in CNY (yuan, not cents) */
+  money_cny: number
+  /** Display unit used by the gateway: 'USD' or 'TOKENS' */
+  display_unit: string
+  /** Original amount the user selected */
+  amount: number
+}
+
+export type WxPayPaymentResponse = ApiResponse<WxPayPaymentData>
+
+/**
+ * WeChat Pay query response: polled after QR scan to detect payment.
+ * status mirrors WeChat trade_state (lowercased): success / notpay / closed / ...
+ */
+export interface WxPayQueryData {
+  trade_no: string
+  status: string
+  paid: boolean
+  total_cents?: number
+}
+
+export type WxPayQueryResponse = ApiResponse<WxPayQueryData>
 
 /**
  * Preset amount option with optional discount

@@ -65,6 +65,8 @@ func SetApiRouter(router *gin.Engine) {
 			userRoute.GET("/logout", controller.Logout)
 			userRoute.POST("/epay/notify", controller.EpayNotify)
 			userRoute.GET("/epay/notify", controller.EpayNotify)
+			// 微信支付 V3 异步回调（公开，靠 V3 签名/AES-GCM 自验）
+			userRoute.POST("/wxpay/notify", controller.WxPayNotify)
 			userRoute.GET("/groups", controller.GetUserGroups)
 
 			selfRoute := userRoute.Group("/")
@@ -88,6 +90,9 @@ func SetApiRouter(router *gin.Engine) {
 				selfRoute.POST("/topup", middleware.CriticalRateLimit(), controller.TopUp)
 				selfRoute.POST("/pay", middleware.CriticalRateLimit(), controller.RequestEpay)
 				selfRoute.POST("/amount", controller.RequestAmount)
+				// 微信支付 V3 Native（PC 扫码）
+				selfRoute.POST("/wxpay/pay", middleware.CriticalRateLimit(), controller.RequestWxPay)
+				selfRoute.GET("/wxpay/query/:trade_no", controller.QueryWxPayOrder)
 				selfRoute.POST("/stripe/pay", middleware.CriticalRateLimit(), controller.RequestStripePay)
 				selfRoute.POST("/stripe/amount", controller.RequestStripeAmount)
 				selfRoute.POST("/creem/pay", middleware.CriticalRateLimit(), controller.RequestCreemPay)

@@ -89,6 +89,10 @@ func isEpayTopUpEnabled() bool {
 	return isEpayWebhookConfigured() && len(operation_setting.PayMethods) > 0
 }
 
+func isWxPayTopUpEnabled() bool {
+	return operation_setting.IsWxPayConfigured()
+}
+
 func isEpayWebhookConfigured() bool {
 	return strings.TrimSpace(operation_setting.PayAddress) != "" &&
 		strings.TrimSpace(operation_setting.EpayId) != "" &&

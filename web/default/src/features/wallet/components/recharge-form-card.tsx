@@ -64,6 +64,11 @@ interface RechargeFormCardProps {
   waffoMinTopup?: number
   onWaffoMethodSelect?: (method: WaffoPayMethod, index: number) => void
   enableWaffoPancakeTopup?: boolean
+  // WeChat Pay V3 Native (direct):
+  enableWxPayTopup?: boolean
+  wxpayMinTopup?: number
+  onWxPayClick?: () => void
+  wxpayLoading?: boolean
 }
 
 export function RechargeFormCard({
@@ -94,6 +99,10 @@ export function RechargeFormCard({
   waffoMinTopup,
   onWaffoMethodSelect,
   enableWaffoPancakeTopup,
+  enableWxPayTopup,
+  wxpayMinTopup,
+  onWxPayClick,
+  wxpayLoading,
 }: RechargeFormCardProps) {
   const { t } = useTranslation()
   const [localAmount, setLocalAmount] = useState(topupAmount.toString())
@@ -114,7 +123,8 @@ export function RechargeFormCard({
     topupInfo?.enable_online_topup ||
     topupInfo?.enable_stripe_topup ||
     enableWaffoTopup ||
-    enableWaffoPancakeTopup
+    enableWaffoPancakeTopup ||
+    enableWxPayTopup
   const hasAnyTopup = hasConfigurableTopup || enableCreemTopup
   const hasStandardPaymentMethods =
     Array.isArray(topupInfo?.pay_methods) && topupInfo.pay_methods.length > 0
@@ -292,7 +302,7 @@ export function RechargeFormCard({
                   <Label className='text-muted-foreground text-xs font-medium tracking-wider uppercase'>
                     {t('Payment Method')}
                   </Label>
-                  {hasStandardPaymentMethods ? (
+                  {hasStandardPaymentMethods || enableWxPayTopup ? (
                     <div className='grid grid-cols-2 gap-1.5 sm:gap-3 lg:grid-cols-3'>
                       {topupInfo?.pay_methods?.map((method) => {
                         const minTopup = method.min_topup || 0
@@ -335,6 +345,40 @@ export function RechargeFormCard({
                           button
                         )
                       })}
+                      {enableWxPayTopup && onWxPayClick && (() => {
+                        const wxMin = wxpayMinTopup || 0
+                        const wxDisabled = wxMin > topupAmount
+                        const wxButton = (
+                          <Button
+                            key='wxpay-direct'
+                            variant='outline'
+                            onClick={onWxPayClick}
+                            disabled={wxDisabled || !!paymentLoading || !!wxpayLoading}
+                            className='h-9 min-w-0 justify-start gap-2 rounded-lg px-3'
+                          >
+                            {wxpayLoading ? (
+                              <Loader2 className='h-4 w-4 animate-spin' />
+                            ) : (
+                              getPaymentIcon('wxpay', 'h-4 w-4')
+                            )}
+                            <span className='truncate'>{t('WeChat Pay')}</span>
+                          </Button>
+                        )
+                        return wxDisabled ? (
+                          <TooltipProvider key='wxpay-direct'>
+                            <Tooltip>
+                              <TooltipTrigger asChild>{wxButton}</TooltipTrigger>
+                              <TooltipContent>
+                                {t('Minimum topup amount: {{amount}}', {
+                                  amount: wxMin,
+                                })}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : (
+                          wxButton
+                        )
+                      })()}
                     </div>
                   ) : hasWaffoPaymentMethods ? null : (
                     <Alert>

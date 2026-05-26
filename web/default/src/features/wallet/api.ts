@@ -20,6 +20,9 @@ import type {
   WaffoPaymentResponse,
   WaffoPancakePaymentRequest,
   WaffoPancakePaymentResponse,
+  WxPayPaymentRequest,
+  WxPayPaymentResponse,
+  WxPayQueryResponse,
 } from './types'
 
 // ============================================================================
@@ -147,6 +150,35 @@ export async function requestWaffoPancakePayment(
   const res = await api.post('/api/user/waffo-pancake/pay', request, {
     skipBusinessError: true,
   } as Record<string, unknown>)
+  return res.data
+}
+
+/**
+ * Request WeChat Pay V3 Native payment. Returns code_url that the
+ * client must render as a QR image.
+ */
+export async function requestWxPayPayment(
+  request: WxPayPaymentRequest
+): Promise<WxPayPaymentResponse> {
+  const res = await api.post('/api/user/wxpay/pay', request, {
+    skipBusinessError: true,
+  } as Record<string, unknown>)
+  return res.data
+}
+
+/**
+ * Poll the WeChat Pay order status by local trade_no. Returns
+ * paid=true once the gateway has confirmed payment.
+ */
+export async function queryWxPayOrder(
+  tradeNo: string
+): Promise<WxPayQueryResponse> {
+  const res = await api.get(
+    `/api/user/wxpay/query/${encodeURIComponent(tradeNo)}`,
+    {
+      skipBusinessError: true,
+    } as Record<string, unknown>
+  )
   return res.data
 }
 

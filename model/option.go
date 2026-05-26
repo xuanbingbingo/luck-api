@@ -77,6 +77,14 @@ func InitOptionMap() {
 	common.OptionMap["CustomCallbackAddress"] = ""
 	common.OptionMap["EpayId"] = ""
 	common.OptionMap["EpayKey"] = ""
+	// 微信支付 V3 Native 直连配置
+	common.OptionMap["WxMchId"] = ""
+	common.OptionMap["WxAppId"] = ""
+	common.OptionMap["WxApiV3Key"] = ""
+	common.OptionMap["WxCertSerialNo"] = ""
+	common.OptionMap["WxPrivateKeyPem"] = ""
+	common.OptionMap["WxCertPem"] = ""
+	common.OptionMap["WxMinTopUp"] = strconv.Itoa(operation_setting.WxMinTopUp)
 	common.OptionMap["Price"] = strconv.FormatFloat(operation_setting.Price, 'f', -1, 64)
 	common.OptionMap["USDExchangeRate"] = strconv.FormatFloat(operation_setting.USDExchangeRate, 'f', -1, 64)
 	common.OptionMap["MinTopUp"] = strconv.Itoa(operation_setting.MinTopUp)
@@ -363,6 +371,20 @@ func updateOptionMap(key string, value string) (err error) {
 		operation_setting.EpayId = value
 	case "EpayKey":
 		operation_setting.EpayKey = value
+	case "WxMchId":
+		operation_setting.WxMchId = value
+	case "WxAppId":
+		operation_setting.WxAppId = value
+	case "WxApiV3Key":
+		operation_setting.WxApiV3Key = value
+	case "WxCertSerialNo":
+		operation_setting.WxCertSerialNo = value
+	case "WxPrivateKeyPem":
+		operation_setting.WxPrivateKeyPem = value
+	case "WxCertPem":
+		operation_setting.WxCertPem = value
+	case "WxMinTopUp":
+		operation_setting.WxMinTopUp, _ = strconv.Atoi(value)
 	case "Price":
 		operation_setting.Price, _ = strconv.ParseFloat(value, 64)
 	case "USDExchangeRate":
