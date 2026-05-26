@@ -84,6 +84,8 @@ func InitOptionMap() {
 	common.OptionMap["WxCertSerialNo"] = ""
 	common.OptionMap["WxPrivateKeyPem"] = ""
 	common.OptionMap["WxCertPem"] = ""
+	common.OptionMap["WxPublicKeyID"] = ""
+	common.OptionMap["WxPublicKeyPem"] = ""
 	common.OptionMap["WxMinTopUp"] = strconv.Itoa(operation_setting.WxMinTopUp)
 	common.OptionMap["Price"] = strconv.FormatFloat(operation_setting.Price, 'f', -1, 64)
 	common.OptionMap["USDExchangeRate"] = strconv.FormatFloat(operation_setting.USDExchangeRate, 'f', -1, 64)
@@ -383,6 +385,10 @@ func updateOptionMap(key string, value string) (err error) {
 		operation_setting.WxPrivateKeyPem = value
 	case "WxCertPem":
 		operation_setting.WxCertPem = value
+	case "WxPublicKeyID":
+		operation_setting.WxPublicKeyID = value
+	case "WxPublicKeyPem":
+		operation_setting.WxPublicKeyPem = value
 	case "WxMinTopUp":
 		operation_setting.WxMinTopUp, _ = strconv.Atoi(value)
 	case "Price":

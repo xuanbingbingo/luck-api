@@ -2,10 +2,15 @@
 //
 // 使用懒加载 + 配置指纹缓存：admin 在后台改完 mch_id / 证书 / APIv3 密钥后，
 // 下一次调用 GetClient 会检测到指纹变化并自动重建客户端，不需要重启进程。
+//
+// 验签模式：2026-Q2 起新申请商户号强制使用「微信支付公钥」模式，
+// 旧的平台证书自动更新机制（WithWechatPayAutoAuthCipher）已废弃。
+// 本实现使用 WithWechatPayPublicKeyAuthCipher。
 package wxpay
 
 import (
 	"context"
+	"crypto/rsa"
 	"fmt"
 	"net/http"
 	"sync"
@@ -14,7 +19,6 @@ import (
 
 	"github.com/wechatpay-apiv3/wechatpay-go/core"
 	"github.com/wechatpay-apiv3/wechatpay-go/core/auth/verifiers"
-	"github.com/wechatpay-apiv3/wechatpay-go/core/downloader"
 	"github.com/wechatpay-apiv3/wechatpay-go/core/notify"
 	"github.com/wechatpay-apiv3/wechatpay-go/core/option"
 	"github.com/wechatpay-apiv3/wechatpay-go/services/payments"
@@ -24,17 +28,20 @@ import (
 
 var (
 	cachedClient      *core.Client
+	cachedPublicKey   *rsa.PublicKey
 	cachedFingerprint string
 	clientMu          sync.Mutex
 )
 
-// 配置指纹：mch_id + 证书序列号 + ApiV3 密钥 + 私钥 PEM 长度。
-// 配置变更后会触发客户端重建。
+// 配置指纹：mch_id + 证书序列号 + ApiV3 密钥 + 私钥 PEM 长度 + 公钥 ID + 公钥 PEM 长度。
+// 任一项变更后会触发客户端重建。
 func configFingerprint() string {
 	return operation_setting.WxMchId + "|" +
 		operation_setting.WxCertSerialNo + "|" +
 		operation_setting.WxApiV3Key + "|" +
-		fmt.Sprintf("%d", len(operation_setting.WxPrivateKeyPem))
+		fmt.Sprintf("%d", len(operation_setting.WxPrivateKeyPem)) + "|" +
+		operation_setting.WxPublicKeyID + "|" +
+		fmt.Sprintf("%d", len(operation_setting.WxPublicKeyPem))
 }
 
 // GetClient 拿到 V3 客户端（懒加载 + 配置变更自动重建）。
@@ -55,20 +62,26 @@ func GetClient(ctx context.Context) (*core.Client, error) {
 
 	privateKey, err := utils.LoadPrivateKey(operation_setting.WxPrivateKeyPem)
 	if err != nil {
-		return nil, fmt.Errorf("加载微信支付私钥失败: %w", err)
+		return nil, fmt.Errorf("加载微信支付商户私钥失败: %w", err)
 	}
 
-	// WithWechatPayAutoAuthCipher 会自动：
-	// 1. 注册 downloader（用于下载平台证书）
-	// 2. 配置签名器（用商户私钥签名）
-	// 3. 配置加解密器（AES-256-GCM with APIv3 Key）
+	publicKey, err := utils.LoadPublicKey(operation_setting.WxPublicKeyPem)
+	if err != nil {
+		return nil, fmt.Errorf("加载微信支付平台公钥失败: %w", err)
+	}
+
+	// WithWechatPayPublicKeyAuthCipher 一键初始化：
+	// 1. 签名器：商户私钥 SHA256-RSA 签名
+	// 2. 验签器：微信支付公钥验签（新商户唯一可用模式）
+	// 3. 加解密器：敏感字段公钥加密 + 私钥解密
 	client, err := core.NewClient(
 		ctx,
-		option.WithWechatPayAutoAuthCipher(
+		option.WithWechatPayPublicKeyAuthCipher(
 			operation_setting.WxMchId,
 			operation_setting.WxCertSerialNo,
 			privateKey,
-			operation_setting.WxApiV3Key,
+			operation_setting.WxPublicKeyID,
+			publicKey,
 		),
 	)
 	if err != nil {
@@ -76,6 +89,7 @@ func GetClient(ctx context.Context) (*core.Client, error) {
 	}
 
 	cachedClient = client
+	cachedPublicKey = publicKey
 	cachedFingerprint = fingerprint
 	return client, nil
 }
@@ -148,17 +162,27 @@ func QueryOrder(ctx context.Context, tradeNo string) (*OrderQueryResult, error) 
 }
 
 // ParseNotify 解密 + 验签 V3 异步回调，返回 Transaction 结构。
-// 必须先调用过 GetClient 才能用（否则 downloader 未注册）。
+// 公钥模式下不依赖 downloader，直接用 SHA256WithRSAPubkeyVerifier 验签。
+// 调用前需保证 GetClient 已成功执行过（确保 cachedPublicKey 已就绪）。
 func ParseNotify(ctx context.Context, req *http.Request) (*payments.Transaction, error) {
-	// 触发 client 初始化（如果还没初始化，会自动注册 downloader）
+	// 触发 client 初始化（同时填充 cachedPublicKey）
 	if _, err := GetClient(ctx); err != nil {
 		return nil, err
 	}
 
-	certVisitor := downloader.MgrInstance().GetCertificateVisitor(operation_setting.WxMchId)
+	clientMu.Lock()
+	publicKey := cachedPublicKey
+	clientMu.Unlock()
+	if publicKey == nil {
+		return nil, fmt.Errorf("微信支付平台公钥未就绪")
+	}
+
 	handler, err := notify.NewRSANotifyHandler(
 		operation_setting.WxApiV3Key,
-		verifiers.NewSHA256WithRSAVerifier(certVisitor),
+		verifiers.NewSHA256WithRSAPubkeyVerifier(
+			operation_setting.WxPublicKeyID,
+			*publicKey,
+		),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("创建回调处理器失败: %w", err)

@@ -13,7 +13,11 @@ var (
 	WxCertSerialNo  = ""
 	WxPrivateKeyPem = ""
 	WxCertPem       = ""
-	WxMinTopUp      = 1
+	// 2026-Q2 起新申请商户号强制使用「微信支付公钥」验签模式（旧平台证书自动更新机制废弃）。
+	// 公钥从商户平台「账户中心 → API 安全 → 微信支付公钥」下载。
+	WxPublicKeyID  = ""
+	WxPublicKeyPem = ""
+	WxMinTopUp     = 1
 )
 
 func IsWxPayConfigured() bool {
@@ -21,5 +25,7 @@ func IsWxPayConfigured() bool {
 		strings.TrimSpace(WxAppId) != "" &&
 		strings.TrimSpace(WxApiV3Key) != "" &&
 		strings.TrimSpace(WxCertSerialNo) != "" &&
-		strings.TrimSpace(WxPrivateKeyPem) != ""
+		strings.TrimSpace(WxPrivateKeyPem) != "" &&
+		strings.TrimSpace(WxPublicKeyID) != "" &&
+		strings.TrimSpace(WxPublicKeyPem) != ""
 }
